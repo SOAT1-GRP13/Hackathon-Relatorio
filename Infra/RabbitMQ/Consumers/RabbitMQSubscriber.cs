@@ -1,0 +1,80 @@
+﻿using System.Text;
+using RabbitMQ.Client;
+using System.Text.Json;
+using RabbitMQ.Client.Events;
+using Application.Pontos.DTO;
+using Domain.Base.DomainObjects;
+using Microsoft.Extensions.Hosting;
+using Domain.Base.Communication.Mediator;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Infra.RabbitMQ.Consumers
+{
+    public abstract class RabbitMQSubscriber : BackgroundService
+    {
+        protected readonly string _nomeDaFila;
+        protected readonly IServiceScopeFactory _scopeFactory;
+        protected readonly IModel _channel;
+
+        protected RabbitMQSubscriber(
+            string nomeExchage,
+            string nomeFila,
+            IServiceScopeFactory scopeFactory,
+            IModel model)
+        {
+            _nomeDaFila = nomeFila;
+            _scopeFactory = scopeFactory;
+            _channel = model;
+
+            _channel.ExchangeDeclare(exchange: nomeExchage, type: ExchangeType.Fanout);
+            _channel.QueueDeclare(queue: _nomeDaFila, durable: true, exclusive: false, autoDelete: false, arguments: null);
+            _channel.QueueBind(queue: _nomeDaFila, exchange: nomeExchage, routingKey: "");
+        }
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            var consumer = new EventingBasicConsumer(_channel);
+
+            consumer.Received += (ModuleHandle, ea) => { InvokeReceivedEvent(ModuleHandle, ea); };
+
+            _channel.BasicConsume(queue: _nomeDaFila, autoAck: true, consumer: consumer);
+
+            return Task.CompletedTask;
+        }
+
+        protected virtual void InvokeReceivedEvent(object? model, BasicDeliverEventArgs ea)
+        {
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var mediatorHandler = scope.ServiceProvider.GetRequiredService<IMediatorHandler>();
+
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
+
+                EspelhoPontoDto pedidoDto;
+                try
+                {
+                    pedidoDto = JsonSerializer.Deserialize<EspelhoPontoDto>(message) ?? new EspelhoPontoDto();
+                }
+                catch (Exception ex)
+                {
+                    throw new DomainException("Erro deserializar EspelhoPontoDto", ex);
+                }
+
+                InvokeCommand(pedidoDto, mediatorHandler);
+            }
+        }
+
+        protected virtual void InvokeCommand(EspelhoPontoDto pedidoDto, IMediatorHandler mediatorHandler) { }
+
+        public override void Dispose()
+        {
+            if (_channel.IsOpen)
+                _channel.Close();
+
+            GC.SuppressFinalize(this);
+
+            base.Dispose();
+        }
+    }
+}
