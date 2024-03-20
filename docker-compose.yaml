@@ -12,7 +12,7 @@ services:
       - "5272:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionString=User ID=fiap;Password=SenhaLocalRelatorio;Host=postgres-db-relatorio;Port=5434;Database=hackathonrelatorio;Pooling=true;
+      - ConnectionString=User ID=fiap;Password=SenhaLocalRelatorio;Host=postgres-db-relatorio;Port=5433;Database=hackathonrelatorio;Pooling=true;
     depends_on:
       postgres-db-relatorio:
         condition: service_healthy
@@ -25,7 +25,7 @@ services:
       POSTGRES_USER: fiap
       POSTGRES_DB: hackathonrelatorio
     ports:
-      - "15436:5433"
+      - "15438:5433"
     volumes:
       - hackathon-soat1-grp13-db-data-relatorio:/var/lib/postgresql/data
     healthcheck:
