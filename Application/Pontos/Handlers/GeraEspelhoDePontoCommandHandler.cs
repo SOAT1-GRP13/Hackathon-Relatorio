@@ -61,15 +61,46 @@ namespace Application.Pontos.Handlers
         private EmailMessage montaCorpoEmail(List<PontoDto> espelhoDePonto) 
         {
             var corpoEmail = new StringBuilder();
-            foreach(var ponto in espelhoDePonto)
+
+            var gruposPorData = espelhoDePonto
+                .GroupBy(p => p.DataHora.Date)
+                .ToList();
+
+            foreach (var grupo in gruposPorData)
             {
-                corpoEmail.AppendLine($"Data: {ponto.DataHora.ToString("dd/MM/yyyy HH:mm")}");
-                corpoEmail.AppendLine($"Tipo de Ponto: {ponto.TipoPontoDescricao}");
-                corpoEmail.AppendLine($"Observação: {ponto.Observacao}");
-                corpoEmail.AppendLine();
+                var entrada = "";
+                var almoco = "";
+                var retorno = "";
+                var saida = "";
+                var pontosDoDia = grupo.OrderBy(p => p.DataHora).ToList();
+                var dia = grupo.First().DataHora.Date;
+                corpoEmail.AppendLine($"Data: {dia.ToString("dd/MM/yyyy")}");
+
+                foreach (var ponto in pontosDoDia)
+                {
+                    switch (ponto.TipoPonto)
+                    {
+                        case (int)TipoPontoEnum.Entrada:
+                            entrada = ponto.DataHora.ToString("HH:mm");
+                            break;
+                        case (int)TipoPontoEnum.Retorno:
+                            retorno = ponto.DataHora.ToString("HH:mm");
+                            break;
+                        case (int)TipoPontoEnum.Almoco:
+                            almoco = ponto.DataHora.ToString("HH:mm");
+                            break;
+                        case (int)TipoPontoEnum.Saida:
+                            saida = ponto.DataHora.ToString("HH:mm");
+                            break;
+                    }
+                }
+
+                corpoEmail.AppendLine($"Data: {dia.ToString("dd/MM/yyyy")}");
+                corpoEmail.AppendLine($"Entrada: {entrada} - Almoco: {almoco} - Retorno: {retorno} - Saída: {saida}");
             }
 
-            corpoEmail.AppendLine($"Total de horas trabalhadas: {calculaHorasTrabalhadas(espelhoDePonto)} horas");
+
+            corpoEmail.AppendLine($"Total de horas trabalhadas: {calculaHorasTrabalhadas(espelhoDePonto, gruposPorData)} horas");
 
             var email = new EmailMessage();
             email.Subject = "Espelho de Ponto";
@@ -79,12 +110,8 @@ namespace Application.Pontos.Handlers
             return email;
         }
 
-        private double calculaHorasTrabalhadas(List<PontoDto> espelhoDePonto)
+        private string calculaHorasTrabalhadas(List<PontoDto> espelhoDePonto, List<IGrouping<DateTime, PontoDto>> gruposPorData)
         {
-            var gruposPorData = espelhoDePonto
-                .GroupBy(p => p.DataHora.Date)
-                .ToList();
-
             TimeSpan totalHorasTrabalhadas = TimeSpan.Zero;
 
             foreach (var grupo in gruposPorData)
@@ -115,7 +142,13 @@ namespace Application.Pontos.Handlers
                 totalHorasTrabalhadas += horasTrabalhadasNoDia;
             }
 
-            return totalHorasTrabalhadas.TotalHours;
+            //return totalHorasTrabalhadas.TotalHours;
+
+            int horas = (int)totalHorasTrabalhadas.TotalHours;
+            int minutos = (int)((totalHorasTrabalhadas.TotalHours - horas) * 60);
+
+            // Retorna o resultado formatado
+            return $"{horas}:{minutos:D2}";
         }
     }
 }
