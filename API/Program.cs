@@ -1,9 +1,11 @@
 using API.Setup;
+using Infra.Pontos;
 using Infra.RabbitMQ;
 using Domain.RabbitMQ;
 using System.Reflection;
 using Domain.Configuration;
 using Infra.RabbitMQ.Consumers;
+using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,7 +45,11 @@ else
 
 builder.Services.Configure<Secrets>(builder.Configuration);
 
-builder.Services.AddMemoryCache();
+builder.Services.AddDbContext<PontosContext>(options =>
+        options.UseNpgsql(connectionString));
+
+//builder.Services.AddAuthenticationJWT(secret);
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddSwaggerExamplesFromAssemblies(Assembly.GetEntryAssembly());
 builder.Services.AddEndpointsApiExplorer();
@@ -85,5 +91,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 await using var scope = app.Services.CreateAsyncScope();
+using var dbApplication = scope.ServiceProvider.GetService<PontosContext>();
+
+await dbApplication!.Database.MigrateAsync();
 
 app.Run();

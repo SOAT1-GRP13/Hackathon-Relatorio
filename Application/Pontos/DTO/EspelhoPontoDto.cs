@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Application.Pontos.DTO
+﻿namespace Application.Pontos.DTO
 {
     public class EspelhoPontoDto
     {
+        public Guid UserId { get; set; }
+
+        public int Mes { get; set; }
+
+        public int Ano { get; set; }
     }
 }

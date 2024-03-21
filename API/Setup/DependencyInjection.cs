@@ -1,5 +1,12 @@
 ﻿using MediatR;
+using Infra.Pontos;
+using Domain.Pontos;
+using Infra.Pontos.Repository;
+using Application.Pontos.Queries;
+using Application.Pontos.UseCases;
 using Infra.Services.EmailService;
+using Application.Pontos.Commands;
+using Application.Pontos.Handlers;
 using Domain.Base.Communication.Mediator;
 using Application.Common.Interfaces.Services;
 using Domain.Base.Messages.CommonMessages.Notifications;
@@ -17,11 +24,14 @@ namespace API.Setup
             services.AddScoped<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
 
             // Notificacao
-            //services.AddScoped<IPedidoNotificacaoUseCase, PedidoNotificacaoUseCase>();
+            services.AddScoped<IPontoRepository, PontoRepository>();
+            services.AddScoped<IPontoQueries, PontoQueries>();
+            services.AddScoped<IPontoUseCase, PontoUseCase>();
+            services.AddScoped<PontosContext>();
+
+            services.AddScoped<IRequestHandler<AdicionarPontoCommand, bool>, AdicionarPontoCommandHandler>();
+            services.AddScoped<IRequestHandler<GeraEspelhoDePontoCommand, bool>, GeraEspelhoDePontoCommandHandler>();
             services.AddScoped<IEmailSender, EmailSender>();
-            //services.AddScoped<IRequestHandler<NotificaPedidoPagamentoAprovadoCommand, NotificacaoEnviadaPedidoDto?>, NotificaPedidoPagamentoAprovadoCommandHandler>();
-            //services.AddScoped<IRequestHandler<NotificaPedidoPagamentoReprovadoCommand, NotificacaoEnviadaPedidoDto?>, NotificaPedidoPagamentoReprovadoCommandHandler>();
-            //services.AddScoped<IRequestHandler<NotificaPedidoProntoCommand, NotificacaoEnviadaPedidoDto?>, NotificaPedidoProntoCommandHandler>();
 
         }
     }
