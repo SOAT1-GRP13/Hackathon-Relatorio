@@ -38,7 +38,7 @@ namespace Infra.Migrations
                 migrationBuilder.InsertData(
                     table: "Pontos",
                     columns: new[] { "Id", "DataHora", "TipoPonto", "Observacao", "UserId" },
-                    values: new object[] { Guid.NewGuid(), DateTime.SpecifyKind(currentDate.AddHours(17).AddMinutes(random.Next(60)), DateTimeKind.Utc), 3, null, userId }
+                    values: new object[] { Guid.NewGuid(), DateTime.SpecifyKind(currentDate.AddHours(18).AddMinutes(random.Next(60)), DateTimeKind.Utc), 3, null, userId }
                 );
             }
         }
