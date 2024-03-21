@@ -25,6 +25,7 @@ namespace Application.Pontos.Handlers
             _emailSender = emailSender;
         }
 
+        #region metodo publicos
         public async Task<bool> Handle(GeraEspelhoDePontoCommand message, CancellationToken cancellationToken)
         {
             if (!message.EhValido())
@@ -57,7 +58,9 @@ namespace Application.Pontos.Handlers
 
             return true;
         }
+        #endregion
 
+        #region metodos privados
         private EmailMessage montaCorpoEmail(List<PontoDto> espelhoDePonto) 
         {
             var corpoEmail = new StringBuilder();
@@ -94,9 +97,8 @@ namespace Application.Pontos.Handlers
                             break;
                     }
                 }
-
-                corpoEmail.AppendLine($"Data: {dia.ToString("dd/MM/yyyy")}");
                 corpoEmail.AppendLine($"Entrada: {entrada} - Almoco: {almoco} - Retorno: {retorno} - Saída: {saida}");
+                corpoEmail.AppendLine();
             }
 
 
@@ -142,13 +144,12 @@ namespace Application.Pontos.Handlers
                 totalHorasTrabalhadas += horasTrabalhadasNoDia;
             }
 
-            //return totalHorasTrabalhadas.TotalHours;
-
             int horas = (int)totalHorasTrabalhadas.TotalHours;
             int minutos = (int)((totalHorasTrabalhadas.TotalHours - horas) * 60);
 
             // Retorna o resultado formatado
             return $"{horas}:{minutos:D2}";
         }
+        #endregion
     }
 }
