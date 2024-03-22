@@ -93,6 +93,7 @@ app.MapControllers();
 await using var scope = app.Services.CreateAsyncScope();
 using var dbApplication = scope.ServiceProvider.GetService<PontosContext>();
 
-await dbApplication!.Database.MigrateAsync();
+if (builder.Environment.IsDevelopment())
+    await dbApplication!.Database.MigrateAsync();
 
 app.Run();
