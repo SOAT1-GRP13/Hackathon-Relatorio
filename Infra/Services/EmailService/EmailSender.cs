@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Models.Email;
+using Domain.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using SendGrid;
@@ -12,11 +13,11 @@ namespace Infra.Services.EmailService
     public class EmailSender : IEmailSender
     {
         private readonly string _sendGridApiKey;
-        public EmailSettings _emailSettings { get; }
-        public EmailSender(IConfiguration configuration, IOptions<EmailSettings> emailSettings)
+        public Secrets _secrets { get; }
+        public EmailSender(IOptions<Secrets> secrets)
         {
-            _sendGridApiKey = configuration["SendGridApiKey"];
-            _emailSettings = emailSettings.Value;
+            _sendGridApiKey = secrets.Value.SendGridApiKey;
+            _secrets = secrets.Value;
         }
         public async Task<bool> SendEmailAsync(EmailMessage email)
         {
@@ -24,8 +25,8 @@ namespace Infra.Services.EmailService
             var to = new EmailAddress(email.To);
             var from = new EmailAddress
             {
-                Email = _emailSettings.FromAddress,
-                Name = _emailSettings.FromName
+                Email = _secrets.FromAddress,
+                Name = _secrets.FromName
             };
 
             var message = MailHelper.CreateSingleEmail(from, to, email.Subject, email.Body, email.Body);

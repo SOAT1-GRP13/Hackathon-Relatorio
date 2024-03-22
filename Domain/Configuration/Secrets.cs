@@ -12,6 +12,9 @@ namespace Domain.Configuration
             ExchangeEspelhoPonto = string.Empty;
             Rabbit_VirtualHost = string.Empty;
             QueueEspelhoPonto = string.Empty;
+            FromAddress = string.Empty;
+            FromName = string.Empty;
+            SendGridApiKey = string.Empty;
         }
 
         public string Rabbit_Hostname { get; set; }
@@ -21,5 +24,8 @@ namespace Domain.Configuration
         public string ExchangeEspelhoPonto { get; set; }
         public string QueueEspelhoPonto { get; set; }
         public string Rabbit_VirtualHost { get; set; }
+        public string FromAddress { get; set; }
+        public string FromName { get; set; }
+         public string SendGridApiKey { get; set; }
     }
 }
