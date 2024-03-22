@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces.Services;
 using Application.Models.Email;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
@@ -10,32 +11,34 @@ namespace Infra.Services.EmailService
 {
     public class EmailSender : IEmailSender
     {
+        private readonly string _sendGridApiKey;
         public EmailSettings _emailSettings { get; }
-        public EmailSender(IOptions<EmailSettings> emailSettings)
+        public EmailSender(IConfiguration configuration, IOptions<EmailSettings> emailSettings)
         {
+            _sendGridApiKey = configuration["SendGridApiKey"];
             _emailSettings = emailSettings.Value;
         }
-        //public async Task<bool> SendEmailAsync(EmailMessage email)
-        //{
-        //    var client = new SendGridClient(_emailSettings.SendGridApiKey);
-        //    var to = new EmailAddress(email.To);
-        //    var from = new EmailAddress
-        //    {
-        //        Email = _emailSettings.FromAddress,
-        //        Name = _emailSettings.FromName
-        //    };
-
-        //    var message = MailHelper.CreateSingleEmail(from, to, email.Subject, email.Body, email.Body);
-        //    var response = await client.SendEmailAsync(message);
-
-        //    return response.IsSuccessStatusCode;
-        //}
-
-        #pragma warning disable CS1998
         public async Task<bool> SendEmailAsync(EmailMessage email)
-        {        
-            return true;
+        {
+            var client = new SendGridClient(_sendGridApiKey);
+            var to = new EmailAddress(email.To);
+            var from = new EmailAddress
+            {
+                Email = _emailSettings.FromAddress,
+                Name = _emailSettings.FromName
+            };
+
+            var message = MailHelper.CreateSingleEmail(from, to, email.Subject, email.Body, email.Body);
+            var response = await client.SendEmailAsync(message);
+
+            return response.IsSuccessStatusCode;
         }
-        #pragma warning restore CS1998
+
+        //#pragma warning disable CS1998
+        //public async Task<bool> SendEmailAsync(EmailMessage email)
+        //{        
+        //    return true;
+        //}
+        //#pragma warning restore CS1998
     }
 }

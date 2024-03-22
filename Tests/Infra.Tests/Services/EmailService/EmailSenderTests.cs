@@ -1,5 +1,6 @@
 ﻿using Application.Models.Email;
 using Infra.Services.EmailService;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 
@@ -11,12 +12,18 @@ namespace Infra.Tests.Services.EmailService
         public async Task SendEmailAsync_Should_Return_True()
         {
             // Arrange
-            var emailSettings = new EmailSettings
+            var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new[]
             {
-                SendGridApiKey = "fake-api-key",
+                new KeyValuePair<string, string>("SendGridApiKey", "apiKey"),
+            })
+            .Build();
+
+            var emailSettings = Options.Create(new EmailSettings
+            {
                 FromAddress = "from@example.com",
-                FromName = "Sender Name"
-            };
+                FromName = "From Name"
+            });
 
             var email = new EmailMessage
             {
@@ -25,8 +32,7 @@ namespace Infra.Tests.Services.EmailService
                 Body = "This is a test email"
             };
 
-            var mockEmailSettings = Options.Create(emailSettings);
-            var emailSender = new EmailSender(mockEmailSettings);
+            var emailSender = new EmailSender(configuration, emailSettings);
 
             // Act
             var result = await emailSender.SendEmailAsync(email);
