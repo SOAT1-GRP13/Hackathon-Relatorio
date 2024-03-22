@@ -15,12 +15,6 @@ namespace Infra.Pontos.Repository
 
         public IUnitOfWork UnitOfWork => _context;
 
-
-        public async Task<Ponto> Adicionar(Ponto ponto)
-        {
-            return (await _context.Pontos.AddAsync(ponto)).Entity;
-        }
-
         public async Task<IEnumerable<Ponto>> ObterEspelhoDePonto(Guid userId, int mes, int ano)
         {
             return await _context.Pontos
