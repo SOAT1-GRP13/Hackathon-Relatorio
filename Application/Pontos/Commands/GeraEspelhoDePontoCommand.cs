@@ -11,11 +11,14 @@ namespace Application.Pontos.Commands
 
         public int Ano { get; set; }
 
-        public GeraEspelhoDePontoCommand(Guid userId, int mes, int ano)
+        public string UserEmail { get; set; }
+
+        public GeraEspelhoDePontoCommand(Guid userId, int mes, int ano, string email)
         {
             UserId = userId;
             Mes = mes;
             Ano = ano;
+            UserEmail = email;
         }
 
         public override bool EhValido()
@@ -36,6 +39,9 @@ namespace Application.Pontos.Commands
 
                 RuleFor(c => c.UserId)
                     .NotEmpty().WithMessage("UserId é obrigatório");
+
+                RuleFor(c => c.UserEmail)
+                .NotEmpty().WithMessage("Email é obrigatório");
             }
         }
 

@@ -14,7 +14,7 @@ namespace Infra.RabbitMQ.Consumers
 
         protected override void InvokeCommand(EspelhoPontoDto espelhoPontoDto, IMediatorHandler mediatorHandler)
         {
-            var command = new GeraEspelhoDePontoCommand(espelhoPontoDto.UserId, espelhoPontoDto.Mes, espelhoPontoDto.Ano);
+            var command = new GeraEspelhoDePontoCommand(espelhoPontoDto.UserId, espelhoPontoDto.Mes, espelhoPontoDto.Ano, espelhoPontoDto.UserEmail);
             mediatorHandler.EnviarComando<GeraEspelhoDePontoCommand, bool>(command).Wait();
         }
     }

@@ -53,7 +53,7 @@ namespace Application.Pontos.Handlers
                 return false;
             }
 
-            var email = montaCorpoEmail(espelhoDePonto);
+            var email = montaCorpoEmail(espelhoDePonto, message.UserEmail);
             await _emailSender.SendEmailAsync(email);
 
             return true;
@@ -61,7 +61,7 @@ namespace Application.Pontos.Handlers
         #endregion
 
         #region metodos privados
-        private EmailMessage montaCorpoEmail(List<PontoDto> espelhoDePonto) 
+        private EmailMessage montaCorpoEmail(List<PontoDto> espelhoDePonto, string userEmail)
         {
             var corpoEmail = new StringBuilder();
 
@@ -104,10 +104,12 @@ namespace Application.Pontos.Handlers
 
             corpoEmail.AppendLine($"Total de horas trabalhadas: {calculaHorasTrabalhadas(espelhoDePonto, gruposPorData)} horas");
 
-            var email = new EmailMessage();
-            email.Subject = "Espelho de Ponto";
-            email.To = ""; //TODO -> Adicionar email do usuário
-            email.Body = corpoEmail.ToString();
+            var email = new EmailMessage
+            {
+                Subject = "Espelho de Ponto",
+                To = userEmail,
+                Body = corpoEmail.ToString()
+            };
 
             return email;
         }
